@@ -14,9 +14,13 @@ func main() {
 	repositories := db.ListRepositories()
 
 	// Read the releases of all the concerned repositories
-	repositories, releases := scraper.GetReleases(repositories)
+	repositories, releases := gh.GetReleases(repositories)
 
 	// Remove all the repositories that already generated notifications
+	db.UpdateRepositories(repositories)
 
 	// Send notifications for the remaining repositories repositories
+	// chat.SendNotifications(releases)
+
+	// Mark all repositories as notified
 }
