@@ -16,6 +16,7 @@ type DB struct {
 }
 
 func NewDB() DB {
+	fmt.Println("Start of NewDB")
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbHost := os.Getenv("DB_HOST")
@@ -25,33 +26,45 @@ func NewDB() DB {
 		dbPort = "26257"
 	}
 	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=verify-full", dbUser, dbPassword, dbHost, dbPort, dbName)
+	fmt.Println("After dsn: " + dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if db == nil {
+		fmt.Println("db is null")
+	}
+	fmt.Println("After gorm.Open")
 	if err != nil {
 		log.Fatal("failed to connect database", err)
 	}
 
+	fmt.Println("After error Handler connect to database")
+
 	// Create the repositories table if it does not exist.
-	if err := db.Exec(`CREATE TABLE IF NOT EXISTS repositories (
+	fmt.Println("Before Create if not exists")
+	/* 	if err := db.Exec(`CREATE TABLE IF NOT EXISTS repositories (
 		id SERIAL PRIMARY KEY,
 		name STRING NOT NULL,
 		tag STRING NOT NULL,
-		notified BOOLEAN NOT NULL,
+		notified BOOLEAN NOT NULL
 		)`); err != nil {
+		fmt.Println("Error in create table if not exists: ")
+		fmt.Println(err)
 		log.Fatal(err)
-	}
+	} */
+
+	fmt.Println("Before Return")
 
 	return DB{db}
 }
 
-func (db DB) ListRepositories() []models.Repository {
+func (db DB) ListRepositories() *[]models.Repository {
 	var repositories []models.Repository
 	db.Find(&repositories)
 
-	return repositories
+	return &repositories
 }
 
-func (db DB) UpdateRepositories(repositories []models.Repository) {
-	for _, r := range repositories {
+func (db DB) UpdateRepositories(repositories *[]models.Repository) {
+	for _, r := range *repositories {
 		db.Save(&r)
 	}
 }

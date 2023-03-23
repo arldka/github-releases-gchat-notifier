@@ -26,12 +26,12 @@ func NewClient() Client {
 	return Client{client}
 }
 
-func (client Client) GetReleases(repositories []models.Repository) ([]models.Repository, []models.Release) {
+func (client Client) GetReleases(repositories *[]models.Repository) (*[]models.Repository, *[]models.Release) {
 
 	var updatedRepositories = []models.Repository{}
 	var releases = []models.Release{}
 
-	for i, r := range repositories {
+	for i, r := range *repositories {
 		// Split repository name into owner and name
 		parts := strings.Split(r.Name, "/")
 		if len(parts) != 2 {
@@ -45,26 +45,26 @@ func (client Client) GetReleases(repositories []models.Repository) ([]models.Rep
 			log.Fatalf("Failed to retrieve release information for %s: %s", r.Name, err)
 		}
 
-		if repositories[i].Tag != release.GetTagName() {
-			repositories[i].Tag = release.GetTagName()
-			repositories[i].Notified = false
+		if (*repositories)[i].Tag != release.GetTagName() {
+			(*repositories)[i].Tag = release.GetTagName()
+			(*repositories)[i].Notified = false
 			releases = append(releases, models.Release{
 				Name:       release.GetName(),
 				Tag:        release.GetTagName(),
 				ReleaseURL: release.GetHTMLURL(),
-				RepoName:   repositories[i].Name,
+				RepoName:   (*repositories)[i].Name,
 			})
-			updatedRepositories = append(updatedRepositories, repositories[i])
-		} else if !repositories[i].Notified {
+			updatedRepositories = append(updatedRepositories, (*repositories)[i])
+		} else if !(*repositories)[i].Notified {
 			releases = append(releases, models.Release{Name: release.GetName(),
 				Tag:        release.GetTagName(),
 				ReleaseURL: release.GetHTMLURL(),
-				RepoName:   repositories[i].Name,
+				RepoName:   (*repositories)[i].Name,
 			})
-			updatedRepositories = append(updatedRepositories, repositories[i])
+			updatedRepositories = append(updatedRepositories, (*repositories)[i])
 		}
 
 	}
 
-	return updatedRepositories, releases
+	return &updatedRepositories, &releases
 }
